@@ -1,0 +1,264 @@
+
+<!DOCTYPE HTML>
+<html xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882">
+<head>
+    <meta charset="UTF-8">
+    <title>Configurateur Demo</title>
+    <link rel="stylesheet" type="text/css" href="style/app.css">
+    <style type="text/css">
+        html,
+        body {
+            background: #fff;
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            font-family: sans-serif;
+        }
+
+        h1 {
+            font-size: 1em;
+            margin: 0;
+        }
+
+        #api-frame {
+            display: block;
+            position: absolute;
+            left: 0;
+            top: 0px;
+            width: 75%;
+            height: 100%;
+            border: 0;
+        }
+
+        #sidebar {
+            display: block;
+            position: absolute;
+            right: 0;
+            top: 0px;
+            width: 25%;
+            height: 100%;
+        }
+
+        #sidebar > * {
+            margin-top: 20px;
+            margin-left: 20px;
+        }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!--[if gte mso 9]><xml>
+<mso:CustomDocumentProperties>
+<mso:_dlc_DocId msdt:dt="string">ANRTQ7QTM56F-258228823-22</mso:_dlc_DocId>
+<mso:_dlc_DocIdItemGuid msdt:dt="string">6c2f5fd3-b79e-4081-8d15-7ea3714ecbd8</mso:_dlc_DocIdItemGuid>
+<mso:_dlc_DocIdUrl msdt:dt="string">https://alvteams.alv.autoliv.int/sites/LivbagEngineering40/_layouts/15/DocIdRedir.aspx?ID=ANRTQ7QTM56F-258228823-22, ANRTQ7QTM56F-258228823-22</mso:_dlc_DocIdUrl>
+</mso:CustomDocumentProperties>
+</xml><![endif]-->
+</head>
+
+<body>
+
+    <iframe src="" id="api-frame" allowfullscreen allow="vr" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+    <div id="sidebar">
+        <h1>Demo de configurateur</h1>
+	<p>Cliquez sur les boutons pour changer de texture</p>
+        <p><input id="bouton1" type="button" value="Texture claire"></input><br></p>
+	<p><input id="bouton2" type="button" value="Texture sombre"></input><br></p>
+    </div>
+
+    <script type="text/javascript" src="https://static.sketchfab.com/api/sketchfab-viewer-1.7.1.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        var api;
+        var nodesByName = {};
+        var nodes = [];
+        var allDigits = {};
+        var initViewer, getNodeList;
+	
+	var textetemperature='';
+	
+
+        initViewer = function(id, callback) {
+            var iframe = document.getElementById('api-frame');
+            var version = '1.7.1';
+
+            var client = new Sketchfab(version, iframe);
+
+            client.init(id, {
+                transparent: 0,
+                preload: 1,
+                ui_infos: 0,
+                ui_stop: 1,
+                ui_annotations: 0,
+                ui_fullscreen: 0,
+                ui_help: 0,
+                ui_vr: 0,
+                ui_inspector: 0,
+                ui_settings: 0,
+                ui_hint: 0,
+                autostart: 1,
+                watermark: 0,
+                success: function onSuccess(apiParam) {
+                    callback();
+                    api = apiParam;
+                    api.start(function() {
+
+                        // Viewer
+                        api.addEventListener('viewerready', function() {
+                            console.log('Viewer ready');
+                        });
+
+			api.getTextureList(function(err, textures) {
+    				if(!err) {
+       		 		console.log('Textures', textures);
+    				}
+ 			});
+
+			api.getNodeMap(function(err, nodes) {
+    				if (!err) {
+        			console.log('Nodes', nodes);
+    				}
+			});
+
+			api.getSceneGraph(function(err, graph) {
+    				if (!err) {
+        				console.log('Graphe',graph);
+    				}
+			});
+
+			
+			
+                        api.addEventListener( 'viewerstart', function() {
+                            console.log( 'Viewer started' );
+                            //document.getElementById('viewer-state').innerText = 'Started';
+                            //document.getElementById('camera-state').innerText = 'Stopped';
+                        });
+                        api.addEventListener( 'viewerstop', function() {
+                            console.log( 'Viewer stopped' );
+                            //document.getElementById('viewer-state').innerText = 'Stopped';
+                            //document.getElementById('camera-state').innerText = 'N/A';
+                            //document.getElementById('mouse-state').innerText = 'N/A';
+                            //document.getElementById('camera-annotation-state').innerText = 'N/A';
+                            //document.getElementById('annotation-state').innerText = 'N/A';
+                            //document.getElementById('unselect-annotation').disabled = true;
+                            //document.getElementById('click-state').innerText = 'N/A';
+                        });
+
+                        // Annotations
+                       api.addEventListener('annotationMouseEnter', function(info) {
+        			console.log('annotationMouseEnter', info);
+				var ladate=new Date();
+				var h=ladate.getHours();
+				if (h<10) {h = "0" + h}
+				var m=ladate.getMinutes();
+				if (m<10) {m = "0" + m}
+				var s=ladate.getSeconds();
+				if (s<10) {s = "0" + s}
+					api.updateAnnotation(0, {
+    						title: 'Nous sommes le :',
+    						content: ladate.getDate()+"/"+(ladate.getMonth()+1)+"/"+ladate.getFullYear()
+						}, function(err, information) {
+    						if(!err) {
+        					console.log(information);
+    					}
+					});
+		
+					api.updateAnnotation(1, {
+    						title: 'il est :',
+    						content: h+":"+m+":"+s
+						}, function(err, information) {
+    						if(!err) {
+        					console.log(information);
+    						}
+					});
+					var url = "https://api.openweathermap.org/data/2.5/weather?q=Brest,fr&appid=c21a75b667d6f7abb81f118dcf8d4611&units=metric";
+    					
+					
+
+					var callBackGetSuccess = function(data) {
+       						textetemperature= parseFloat(data.main.temp*1.0) +'\xB0C';
+						api.updateAnnotation(2, {
+    							title: 'A Brest, il fait :',
+    							content: textetemperature
+							}, function(err, information) {
+    							if(!err) {
+        						console.log('fff',information);
+    							}
+						});
+    					}
+					$.get(url, callBackGetSuccess).done(function() {
+        					//alert( "second success" );
+     						 })
+     						 .fail(function() {
+      						  //alert( "error" );
+     						 })
+      						.always(function() {
+       						 //alert( "finished");
+      						});
+			
+			});
+
+                        // Camera
+                        
+
+                        // Click
+                     
+
+                        // Button
+                        document.getElementById('bouton1').addEventListener('click', function() {
+                            	api.getMaterialList(function(err, materials) {
+    						if(!err) {
+        						console.log('matclickobjects',materials);
+   						 }
+						 for (var i = 0; i < materials.length; i++) {
+                    					var m = materials[i];
+                   					 if (m.name == "fondAutolivDark") { 
+                    					
+               						m.channels.AlbedoPBR.texture.uid = "123a36ea88e947b39d0a78811327e196";
+							api.setMaterial(m)
+ 							}
+							if (m.name == "bleuclair") { 
+                    					m.channels.AlbedoPBR.color=[0,0.639,0.866];
+							api.setMaterial(m)
+ 							}
+						}
+					
+					});
+                        });
+			document.getElementById('bouton2').addEventListener('click', function() {
+                         	api.getMaterialList(function(err, materials) {
+    						if(!err) {
+        						console.log('matclickobjects',materials);
+   						 }
+						 for (var i = 0; i < materials.length; i++) {
+                    					var m = materials[i];
+                   					 if (m.name == "fondAutolivDark") { 
+                    					console.log("click",m.name, m);
+               						m.channels.AlbedoPBR.texture.uid = "626938cb2e494ca6ae294b3fb4b9af22";
+							api.setMaterial(m)
+ 							}
+							if (m.name == "bleuclair") { 
+                    					m.channels.AlbedoPBR.color=[1,0.78,0.27];
+							api.setMaterial(m)
+ 							}
+						}
+					
+					});   	
+                        });
+
+                    });
+                },
+                error: function onError() {
+                    console.log('Error while initializing the viewer');
+                }
+            });
+        };
+
+        var startedCall = function() {
+            console.log('Viewer started during initialization');
+            //document.getElementById('viewer-state').innerText = 'Started';
+        };
+
+        initViewer('efd0af8ef3474b8d9be2165f9d45a35e', startedCall);
+    </script>
+</body>
+</html>
